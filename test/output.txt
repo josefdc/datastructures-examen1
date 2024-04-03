@@ -1,0 +1,13 @@
+add x1, x2, x3 
+sub x4, x5, x6 
+xor x7, x8, x9 
+sw x10, 20x11 
+sh x12, -4x13 
+sb x14, 100x15 
+beq x16, x17, 50 
+bne x18, x19, 100 
+blt x20, x21, 200 
+lui x22, 1000 
+auipc x23, 200 
+jal x24, 500 
+nop 
