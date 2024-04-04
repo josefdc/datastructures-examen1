@@ -1,6 +1,11 @@
 #include <iostream>
 #include <fstream>
-#include "parser.hh" // Ruta relativa al directorio actual
+#include "parser.hh"
+#include "encoder.hh"
+
+#include <string>
+#include <vector>
+
 
 int main() {
     // Abrir el archivo de entrada
