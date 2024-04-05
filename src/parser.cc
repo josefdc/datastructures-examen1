@@ -1,7 +1,8 @@
 #include "parser.hh"
 #include <cctype>
 #include <sstream>
-
+#include "encoder.hh"
+#include <iostream>
 
 /**
  * @brief Removes parentheses from a given string.
@@ -64,8 +65,19 @@ LineType Parser::identifyLineType(const std::string& line) {
  * @param line The assembly instruction line to be parsed.
  * @return An InstructionComponents struct containing the opcode and operands extracted from the line.
  */
+/**
+ * @brief Parses an assembly instruction line to extract its components.
+ * 
+ * This method first removes comments and parentheses from the line. Then, it separates the line into words using whitespace as a delimiter, treating each word as an operand.
+ * @param line The assembly instruction line to be parsed.
+ * @return An InstructionComponents struct containing the opcode and operands extracted from the line.
+ */
 InstructionComponents Parser::parseInstruction(const std::string& line) {
     InstructionComponents components;
+    components.opcode = ""; // Inicializar opcode a una cadena vacía
+    components.operands = {}; // Inicializar operands como un vector vacío
+
+    
 
     // Remove parentheses and comments from the line
     std::string cleanLine = removeParentheses(removeComments(line));
@@ -83,6 +95,34 @@ InstructionComponents Parser::parseInstruction(const std::string& line) {
         components.opcode = components.operands.front();
         components.operands.erase(components.operands.begin());
     }
+
+    // Construir las instrucciones adecuadas y asignarlas a los miembros correspondientes de components
+    InstructionType type = Encoder::getInstructionType(components.opcode);
+    switch (type) {
+        case InstructionType::R_Type:
+            Encoder::initializeRTypeInstruction(components.rTypeInstruction, funct7, rs2, rs1, funct3, rd, opcode); // Inicializar los miembros según el encoder
+            break;
+        case InstructionType::I_Type:
+            Encoder::initializeITypeInstruction(components.iTypeInstruction, imm, rs1, funct3, rd, opcode); // Inicializar los miembros según el encoder
+            break;
+        case InstructionType::S_Type:
+            Encoder::initializeSTypeInstruction(components.sTypeInstruction, imm, rs2, rs1, funct3, opcode); // Inicializar los miembros según el encoder
+            break;
+        case InstructionType::B_Type:
+            Encoder::initializeBTypeInstruction(components.bTypeInstruction, imm, rs2, rs1, funct3, opcode); // Inicializar los miembros según el encoder
+            break;
+        case InstructionType::U_Type:
+            Encoder::initializeUTypeInstruction(components.uTypeInstruction, imm, rd, opcode); // Inicializar los miembros según el encoder
+            break;
+        case InstructionType::J_Type:
+            Encoder::initializeJTypeInstruction(components.jTypeInstruction, imm, rd, opcode); // Inicializar los miembros según el encoder
+            break;
+        default:
+            std::cerr << "Tipo de instrucción desconocido." << std::endl;
+            break;
+    }
+
+
 
     return components;
 }

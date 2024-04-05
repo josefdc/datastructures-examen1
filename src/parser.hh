@@ -1,47 +1,41 @@
-/**
- * @file parser.h
- * @brief Defines the Parser class used to analyze and extract components from assembly lines.
- *
- * This header file defines the structure and functionalities for parsing assembly lines,
- * identifying their types (e.g., instructions, labels, directives), and extracting instruction components.
- */
-
-#ifndef PARSER_H
-#define PARSER_H
+#ifndef PARSER_HH
+#define PARSER_HH
 
 #include <string>
 #include <vector>
 
+
+class InstructionComponents {
+public:
+    RTypeInstruction rTypeInstruction;
+    ITypeInstruction iTypeInstruction;
+    STypeInstruction sTypeInstruction;
+    BTypeInstruction bTypeInstruction;
+    UTypeInstruction uTypeInstruction;
+    JTypeInstruction jTypeInstruction;
+    std::string opcode;
+    std::vector<std::string> operands;
+};
+
 /**
  * @enum LineType
- * @brief Represents the possible types of lines found in assembly code.
+ * @brief Enumerates the types of lines in an assembly file.
  */
 enum class LineType {
-    Label,       ///< A label marking a location in code.
-    Instruction, ///< An assembly instruction.
-    Directive,   ///< A directive to the assembler.
-    Comment,     ///< A comment line.
-    Unknown      ///< An unknown line type.
+    Instruction, ///< Assembly instruction.
+    Label,       ///< Label definition.
+    Directive,   ///< Directive.
+    Comment      ///< Comment.
 };
 
 /**
  * @struct InstructionComponents
- * @brief Holds the opcode and operands of an assembly instruction.
- *
- * This structure is used to store the decomposed parts of an assembly instruction,
- * including its opcode and any operands it may have.
+ * @brief Contains the components of an assembly instruction.
  */
-struct InstructionComponents {
-    std::string opcode;                 ///< The opcode of the instruction.
-    std::vector<std::string> operands;  ///< The operands of the instruction, if any.
-};
 
 /**
  * @class Parser
- * @brief Provides functionalities for parsing assembly code lines.
- *
- * The Parser class includes methods for identifying the type of a given line of assembly code
- * and for extracting the components of an instruction from a line.
+ * @brief Provides methods for parsing assembly code.
  */
 class Parser {
 public:
@@ -50,14 +44,14 @@ public:
      * @param line The assembly code line to be analyzed.
      * @return The LineType enumeration value corresponding to the type of the line.
      */
-    LineType identifyLineType(const std::string& line);
+    static LineType identifyLineType(const std::string& line);
 
     /**
-     * @brief Extracts the opcode and operands from an assembly instruction line.
+     * @brief Parses an assembly instruction line to extract its components.
      * @param line The assembly instruction line to be parsed.
-     * @return An InstructionComponents struct containing the opcode and operands.
+     * @return An InstructionComponents struct containing the opcode and operands extracted from the line.
      */
-    InstructionComponents parseInstruction(const std::string& line);
+    static InstructionComponents parseInstruction(const std::string& line);
 };
 
-#endif // PARSER_H
+#endif // PARSER_HH
