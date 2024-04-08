@@ -1,0 +1,122 @@
+[33mcommit 3e3bb9d0655da6584a7baab61cbabda26bf73bb3[m[33m ([m[1;36mHEAD -> [m[1;32msolucion[m[33m, [m[1;31morigin/solucion[m[33m)[m
+Author: Juandagarc <juandagarce@gmail.com>
+Date:   Fri Apr 5 18:42:01 2024 -0500
+
+    problema con parser
+
+[33mcommit da578e262d5b550a7c9d582e00546f3a8b37db1e[m
+Author: Jose Felipe Duarte Coronado <77589315+josefdc@users.noreply.github.com>
+Date:   Thu Apr 4 17:54:01 2024 +0000
+
+    Encoder.cc y documentancion en general
+
+[33mcommit 6100c4ecff127367fa1f321b4246484f8b655c77[m
+Author: Juandagarc <juandagarce@gmail.com>
+Date:   Wed Apr 3 12:19:05 2024 -0500
+
+    parser y estructura
+
+[33mcommit 5c507c7912fc63cae8712ef9f2f06b0e738f9b9f[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m
+Author: Gustavo Gutiérrez <ggutierrez@users.noreply.github.com>
+Date:   Fri Mar 29 19:02:06 2024 -0500
+
+    more on immediates
+
+[33mcommit 74d5e85e87acf2456aecc054cd582f7d91ca2e27[m
+Author: Gustavo Gutiérrez <ggutierrez@users.noreply.github.com>
+Date:   Fri Mar 29 18:48:21 2024 -0500
+
+    Added immediate diagrams
+
+[33mcommit ab034c9f583f392ceded84415b244a711e8bb27a[m
+Author: Gustavo Gutiérrez <ggutierrez@users.noreply.github.com>
+Date:   Fri Mar 29 17:58:15 2024 -0500
+
+    finally, all images were replaced
+
+[33mcommit 3108487ea1dfad0a0e5131af685fc4b60b7552df[m
+Author: Gustavo Gutiérrez <ggutierrez@users.noreply.github.com>
+Date:   Fri Mar 29 17:49:52 2024 -0500
+
+    Added instructions summary
+
+[33mcommit c49ce1c9d2b4a22983d47db242b0a76eff9c1a9e[m
+Author: Gustavo Gutiérrez <ggutierrez@users.noreply.github.com>
+Date:   Fri Mar 29 16:41:22 2024 -0500
+
+    Better pictures
+
+[33mcommit 97e3cb4d36b3048337fa6f2e08aa941bcab0327b[m
+Author: Gustavo Gutiérrez <ggutierrez@users.noreply.github.com>
+Date:   Fri Mar 29 16:04:32 2024 -0500
+
+    Removed no needed images
+
+[33mcommit dc788fe93a01044c1d25cc7dd855d3790075dc43[m
+Author: Gustavo Gutiérrez <ggutierrez@users.noreply.github.com>
+Date:   Fri Mar 29 15:52:12 2024 -0500
+
+    License free prictures
+
+[33mcommit 99ce096605eee9cb668e00c4bdaca033c46c5924[m
+Author: Gustavo Gutiérrez <ggutierrez@users.noreply.github.com>
+Date:   Fri Mar 29 12:59:33 2024 -0500
+
+    Better image for branch
+
+[33mcommit 4471cfda6b3ae69caa3a2da4d31356498dd4925f[m
+Author: Gustavo Gutiérrez <ggutierrez@users.noreply.github.com>
+Date:   Tue Mar 26 17:41:24 2024 -0500
+
+    Finalizado las instrucciones.
+
+[33mcommit 0729668daa0c3946fd17b072f2bbb497967b7a29[m
+Author: Gustavo Gutiérrez <ggutierrez@users.noreply.github.com>
+Date:   Tue Mar 26 16:49:00 2024 -0500
+
+    Ejercicio 6
+
+[33mcommit e5a25c816e1e61caa92cb71131c30f5ab98cf292[m
+Author: Gustavo Gutiérrez <ggutierrez@users.noreply.github.com>
+Date:   Sun Mar 24 00:31:50 2024 -0500
+
+    Exercise 6
+
+[33mcommit 8467e881df63a8c6aab4054a24eed242b1635ebf[m
+Merge: b0272a3 f382ff9
+Author: gustavogutierrezutp <162160433+gustavogutierrezutp@users.noreply.github.com>
+Date:   Sat Mar 23 22:48:24 2024 -0500
+
+    Merge pull request #1 from utpgustavogutierrez/main
+    
+    Another exercise
+
+[33mcommit f382ff9fd1215f5f64e03c13f178e25f577feb41[m
+Author: Gustavo Gutiérrez <ggutierrez@users.noreply.github.com>
+Date:   Sat Mar 23 22:43:30 2024 -0500
+
+    Another exercise
+
+[33mcommit b0272a348d892ce55322d455601d12e599953a17[m
+Author: Gustavo Gutiérrez <ggutierrez@users.noreply.github.com>
+Date:   Sat Mar 23 18:32:12 2024 -0500
+
+    documments link
+
+[33mcommit 47ab9202cec8359eb005a19713cdf18f04d1dd6b[m
+Author: Gustavo Gutiérrez <ggutierrez@users.noreply.github.com>
+Date:   Sat Mar 23 18:21:38 2024 -0500
+
+    ejercicio 4
+
+[33mcommit 4c8d06c7d67a28b9d2013343413196f01e57a50b[m
+Author: Gustavo Gutiérrez <ggutierrez@users.noreply.github.com>
+Date:   Fri Mar 22 22:51:04 2024 -0500
+
+    More exercises
+
+[33mcommit e7312c03425721a710827bea22252cb49593a0a9[m
+Author: Gustavo Gutiérrez <ggutierrez@users.noreply.github.com>
+Date:   Fri Mar 22 15:06:11 2024 -0500
+
+    Ejercicio 1
