@@ -34,6 +34,12 @@ string encodeConstNumber(string n ) {
     return binary.to_string();
 }
 
+string encodeConstNumberTypeU(string n ) {
+    int arg = stoi(n.substr(0,n.length()));
+    bitset<20> binary(arg);
+    return binary.to_string();
+}
+
 vector<string> separeConstNumber( string n ) {
     vector<string> result;
     result.push_back(n.substr(0, 7));
@@ -65,6 +71,24 @@ bool isTypeI(string& l) {
     return 0;
 }
 
+bool isTypeB( string& l ) {
+    if(l.find("beq") != l.npos) return 1;
+    if(l.find("bne") != l.npos) return 1;
+    if(l.find("blt") != l.npos) return 1;
+    return 0;
+}
+
+bool isTypeU( string& l ) {
+    if(l.find("lui") != l.npos) return 1;
+    if(l.find("auipc") != l.npos) return 1;
+    return 0;
+}
+
+bool isTypeJ( string& l ) {
+    if(l.find("jal") != l.npos) return 1;
+    return 0;
+}
+
 string extractInst(string& l){
     if(l.find("sw") != l.npos){ l.erase(l.find("sw"), 2);return "sw";}
     if(l.find("sb") != l.npos){ l.erase(l.find("sb"), 2);return "sb";}
@@ -74,6 +98,12 @@ string extractInst(string& l){
     if(l.find("add") != l.npos){ l.erase(l.find("add"), 3);return "add";}
     if(l.find("sub") != l.npos){ l.erase(l.find("sub"), 3);return "sub";}
     if(l.find("xor") != l.npos){ l.erase(l.find("xor"), 3);return "xor";}
+    if(l.find("beq") != l.npos){ l.erase(l.find("beq"), 3);return "beq";}
+    if(l.find("bne") != l.npos){ l.erase(l.find("bne"), 3);return "bne";}
+    if(l.find("blt") != l.npos){ l.erase(l.find("blt"), 3);return "blt";}
+    if(l.find("lui") != l.npos){ l.erase(l.find("lui"), 3);return "lui";}
+    if(l.find("auipc") != l.npos){ l.erase(l.find("auipc"), 5);return "auipc";}
+    if(l.find("jal") != l.npos){ l.erase(l.find("jal"), 3);return "jal";}
     return "";
 }
 
@@ -168,7 +198,54 @@ string processTypeI(string inst, string rest) {
         string result = imn + rs1 + func3 + rd + opcode;
         return result;
     }
+    if ( inst == "lw" ) {
+        string dest = args[1];
+        vector<string> imn = separeImn(dest);
+        string numberConst= encodeConstNumber(imn[0]);
+        string rs1= encodeRs1(imn[1]);
+        string func3 = "010";
+        string rd = encodeRegister(args[0]);
+        string opcode = "0000011";
+        string result = numberConst + rs1 + func3 + rd + opcode;
+        return result;
+    }
     return "";
+}
+
+string processTypeB(string inst, string rest) {
+    cout << "processTypeB" << endl;
+    vector<string> args = split(rest);
+    vector<string> numberConst= separeConstNumber(encodeConstNumber(args[2]));
+    string rs2 = encodeRegister(args[1]);
+    string rs1 = encodeRegister(args[0]);
+    string func3;
+    if(inst == "beq"){ func3 = "000"; }
+    if(inst == "bne"){ func3 = "001"; }
+    if(inst == "blt"){ func3 = "100"; }
+    string opcode = "1100011";
+    string result = numberConst[0] + rs2 +rs1 + func3 + numberConst[1] + opcode;
+
+    return result;
+}
+
+string processTypeU(string inst, string rest) {
+    cout << "processTypeU" << endl;
+    vector<string> args = split(rest);
+    string numberConst = encodeConstNumberTypeU(args[1]);
+    string rd = encodeRegister(args[0]);
+    string opcode = "0110111";
+    string result = numberConst + rd + opcode;
+    return result;
+}
+
+string processTypeJ(string inst, string rest) {
+    cout << "processTypeJ" << endl;
+    vector<string> args = split(rest);
+    string numberConst = encodeConstNumberTypeU(args[1]);
+    string rd = encodeRegister(args[0]);
+    string opcode = "1101111";
+    string result = numberConst + rd + opcode;
+    return result;
 }
 
 int main() {
@@ -202,6 +279,14 @@ int main() {
         if(isTypeI(inst)){
             string typeI = processTypeI(inst, line);
             cout << typeI << endl;
+        }
+        if(isTypeB(inst)){
+            string typeB = processTypeB(inst, line);
+            cout << typeB << endl;
+        }
+        if(isTypeU(inst)){
+            string typeJ = processTypeJ(inst, line);
+            cout << typeJ << endl;
         }
     }
 
