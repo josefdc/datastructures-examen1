@@ -6,15 +6,16 @@
 
 using namespace std;
 
+
 bool hasComment(string& l) {
     return l.find("#") != l.npos;
     }
 
- void removeComment(string& l) {
+void removeComment(string& l) {
     if (hasComment(l)){
         l.erase(l.find("#"));
     }
- }
+}
 
 string encodeRegister(string n) {
     int arg = stoi(n.substr(2,n.length()));
@@ -146,6 +147,21 @@ vector<string> separeImn(string l){
     return result;
 }
 
+string encodeBType(const string& label, int currentAddress, const map<string, int>& labelAddressMap) {
+    int targetAddress = labelAddressMap.at(label);
+    int offset = targetAddress - currentAddress;
+    bitset<12> offsetBits(offset >> 1); // El desplazamiento se cuenta en incrementos de 2 bytes
+
+    string imm;
+    imm.push_back(offsetBits[11] ? '1' : '0'); // b12
+    imm += bitset<6>(offsetBits.to_string(), 5, 6).to_string(); // b5-b10
+    imm += bitset<4>(offsetBits.to_string(), 1, 4).to_string(); // b1-b4
+    imm.push_back(offsetBits[0] ? '1' : '0'); // b11
+
+    return imm;
+}
+
+
 vector<string> split(string& l){
     vector<string> result;
     while(l.find(',') != l.npos){
@@ -228,21 +244,23 @@ string processTypeI(string inst, string rest) {
     return "";
 }
 
-string processTypeB(string inst, string rest) {
-    cout << "processTypeB" << endl;
+string processTypeB(string inst, string rest, int currentAddress, const map<string, int>& labelAddressMap) {
     vector<string> args = split(rest);
-    vector<string> numberConst= separeConstNumber(encodeConstNumber(args[2]));
+    string label = args[2]; // Asume que args[2] contiene la etiqueta
+    string imm = encodeBType(label, currentAddress, labelAddressMap);
+
     string rs2 = encodeRegister(args[1]);
     string rs1 = encodeRegister(args[0]);
     string func3;
-    if(inst == "beq"){ func3 = "000"; }
-    if(inst == "bne"){ func3 = "001"; }
-    if(inst == "blt"){ func3 = "100"; }
-    string opcode = "1100011";
-    string result = numberConst[0] + rs2 +rs1 + func3 + numberConst[1] + opcode;
+    if (inst == "beq") func3 = "000";
+    if (inst == "bne") func3 = "001";
+    if (inst == "blt") func3 = "100";
 
+    string opcode = "1100011";
+    string result = imm.substr(0, 1) + imm.substr(2, 6) + rs2 + rs1 + func3 + imm.substr(1, 1) + imm.substr(8, 4) + opcode;
     return result;
 }
+
 
 string processTypeU(string inst, string rest) {
     cout << "processTypeU" << endl;
