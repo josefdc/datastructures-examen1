@@ -89,23 +89,39 @@ bool isTypeJ( string& l ) {
     return 0;
 }
 
-string extractInst(string& l){
-    if(l.find("sw") != l.npos){ l.erase(l.find("sw"), 2);return "sw";}
-    if(l.find("sb") != l.npos){ l.erase(l.find("sb"), 2);return "sb";}
-    if(l.find("sh") != l.npos){ l.erase(l.find("sh"), 2);return "sh";}
-    if(l.find("addi") != l.npos){ l.erase(l.find("addi"), 4);return "addi";}
-    if(l.find("lw") != l.npos){ l.erase(l.find("lw"), 2);return "lw";}
-    if(l.find("add") != l.npos){ l.erase(l.find("add"), 3);return "add";}
-    if(l.find("sub") != l.npos){ l.erase(l.find("sub"), 3);return "sub";}
-    if(l.find("xor") != l.npos){ l.erase(l.find("xor"), 3);return "xor";}
-    if(l.find("beq") != l.npos){ l.erase(l.find("beq"), 3);return "beq";}
-    if(l.find("bne") != l.npos){ l.erase(l.find("bne"), 3);return "bne";}
-    if(l.find("blt") != l.npos){ l.erase(l.find("blt"), 3);return "blt";}
-    if(l.find("lui") != l.npos){ l.erase(l.find("lui"), 3);return "lui";}
-    if(l.find("auipc") != l.npos){ l.erase(l.find("auipc"), 5);return "auipc";}
-    if(l.find("jal") != l.npos){ l.erase(l.find("jal"), 3);return "jal";}
+string extractInst(string& l) {
+    // Instrucciones de tipo S
+    if (l.find("sw") != l.npos) { l.erase(l.find("sw"), 2); return "sw"; }
+    if (l.find("sb") != l.npos) { l.erase(l.find("sb"), 2); return "sb"; }
+    if (l.find("sh") != l.npos) { l.erase(l.find("sh"), 2); return "sh"; }
+
+    // Instrucciones de tipo I
+    if (l.find("addi") != l.npos) { l.erase(l.find("addi"), 4); return "addi"; }
+    if (l.find("ori") != l.npos) { l.erase(l.find("ori"), 3); return "ori"; }
+    if (l.find("lw") != l.npos) { l.erase(l.find("lw"), 2); return "lw"; }
+
+    // Instrucciones de tipo R
+    if (l.find("add") != l.npos) { l.erase(l.find("add"), 3); return "add"; }
+    if (l.find("sub") != l.npos) { l.erase(l.find("sub"), 3); return "sub"; }
+    if (l.find("xor") != l.npos) { l.erase(l.find("xor"), 3); return "xor"; }
+    if (l.find("and") != l.npos) { l.erase(l.find("and"), 3); return "and"; }
+    if (l.find("sll") != l.npos) { l.erase(l.find("sll"), 3); return "sll"; }
+
+    // Instrucciones de tipo B
+    if (l.find("beq") != l.npos) { l.erase(l.find("beq"), 3); return "beq"; }
+    if (l.find("bne") != l.npos) { l.erase(l.find("bne"), 3); return "bne"; }
+    if (l.find("blt") != l.npos) { l.erase(l.find("blt"), 3); return "blt"; }
+
+    // Instrucciones de tipo U
+    if (l.find("lui") != l.npos) { l.erase(l.find("lui"), 3); return "lui"; }
+    if (l.find("auipc") != l.npos) { l.erase(l.find("auipc"), 5); return "auipc"; }
+
+    // Instrucción de tipo J
+    if (l.find("jal") != l.npos) { l.erase(l.find("jal"), 3); return "jal"; }
+
     return "";
 }
+
 
 string extractFunc3(string& inst){
     if( inst=="sw" )return "010";
