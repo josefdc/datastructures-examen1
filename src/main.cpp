@@ -4,6 +4,7 @@
 #include <bitset>
 #include <string>
 #include <map>
+#include <algorithm>
 
 using namespace std;
 
@@ -67,7 +68,23 @@ vector<string> separeConstNumber( string n ) {
     result.push_back(n.substr(7, n.length()));
     return result;
 }
+vector<string> separeBtypeconst (string n ) {
 
+    vector<string> result;
+    result.push_back(n.substr(11,1)); // 12
+    cout << n.substr(11,1) << endl;
+    string parte2 = n.substr(5,10);
+    cout << parte2 << endl;
+    //reverse(parte2.begin(), parte2.end());
+    result.push_back(parte2);
+    string parte3 = n.substr(1,4);
+    cout << parte3 << endl;
+    //reverse(parte3.begin(), parte3.end());
+    result.push_back(parte3);
+    result.push_back(n.substr(10,1)); //11
+    cout << n.substr(10,1) << endl;
+    return result;
+}
 
 
 // beq x0, x0, swap
@@ -144,12 +161,23 @@ string extractInst(string& l) {
 }
 
 
-string extractFunc3(string& inst){
-    if( inst=="sw" )return "010";
-    if( inst=="sh" )return "001";
-    if( inst=="sb" )return "000";
-    return "";
+string extractFunc3(string& inst) {
+    if (inst == "beq") return "000";
+    else if (inst == "bne") return "001";
+    else if (inst == "blt") return "100";
+    else if (inst == "bge") return "101";
+    else if (inst == "bltu") return "110";
+    else if (inst == "bgeu") return "111";
+    else if (inst == "sw") return "010";
+    else if (inst == "sh") return "001";
+    else if (inst == "sb") return "000";
+    
+    else {
+        cerr << "Error: Instrucción desconocida o no soportada '" << inst << "' para extractFunc3." << endl;
+        throw std::invalid_argument("Instrucción desconocida para extractFunc3");
+    }
 }
+
 
 vector<string> separeImn(string l){
     vector<string> result;
@@ -167,28 +195,44 @@ vector<string> separeImn(string l){
     return result;
 }
 
-string encodeBType(const string& label, int currentAddress, const map<string, int>& labelAddressMap) {
+
+vector<string> encodeBType(const string& label, int currentAddress, const map<string, int>& labelAddressMap) {
     if (labelAddressMap.find(label) == labelAddressMap.end()) {
-        cerr << "Error: Etiqueta '" << label << "' no definida." << endl;
-        throw std::out_of_range("Etiqueta no definida en el mapa.");
+        cerr << "Error: La etiqueta '" << label << "' no está definida." << endl;
+        throw std::out_of_range("La etiqueta no está definida en el mapa.");
     }
 
     int targetAddress = labelAddressMap.at(label);
     int offset = targetAddress - currentAddress;
-    bitset<12> offsetBits(offset >> 1); // El desplazamiento se cuenta en incrementos de 2 bytes
 
-    cout << targetAddress << endl;
-    cout << currentAddress << endl;
-    cout << offset << endl;
+    // offset es un múltiplo de 2.
+    if (offset % 2 != 0) {
+        throw std::runtime_error("El offset no es un múltiplo de 2.");
+    }
+    offset >>= 1 ; // Desplazar 1 bit a la derecha, ya que el bit en la posicion cero no se tiene en cuenta
 
-    string imm;
-    imm.push_back(offsetBits[11] ? '1' : '0'); // b12
-    imm += bitset<6>(offsetBits.to_string(), 5, 6).to_string(); // b5-b10
-    imm += bitset<4>(offsetBits.to_string(), 1, 4).to_string(); // b1-b4
-    imm.push_back(offsetBits[0] ? '1' : '0'); // b11
+    bitset<13> offsetBits(offset); 
+    string imm13 = offsetBits.to_string();
 
-    return imm;
+    // b12 es el bit más significativo de offsetBits.
+    string b12 = imm13.substr(0, 1);
+
+    // b11 es el segundo bit menos significativo de offsetBits.
+    string b11 = imm13.substr(11, 1);
+
+    // b10_5 son los bits 10 a 5 de offsetBits.
+    string b10_5 = imm13.substr(1, 6);
+
+    // b4_1 son los bits 4 a 1 de offsetBits.
+    string b4_1 = imm13.substr(7, 4);
+
+    return {b12, b11, b10_5, b4_1};
 }
+
+    
+
+
+
 
 
 
@@ -275,28 +319,31 @@ string processTypeI(string inst, string rest) {
 }
 
 string processTypeB(string inst, string rest, int currentAddress, const map<string, int>& labelAddressMap) {
-    cout << "processTypeB" << endl;  // Asegúrate de que esta línea esté presente para visualizar el procesamiento.
     vector<string> args = split(rest);
     string label = args[2];
-    trim(label); // Asegúrate de eliminar espacios en la etiqueta
-    if (labelAddressMap.find(label) == labelAddressMap.end()) {
-        cerr << "Error: Etiqueta '" << label << "' no definida." << endl;
-        throw std::out_of_range("Etiqueta no definida en el mapa.");
-    }
-    string imm = encodeBType(label, currentAddress, labelAddressMap);
+    trim(label);
+
+    vector<string> imm = encodeBType(label, currentAddress, labelAddressMap);
 
     string rs2 = encodeRegister(args[1]);
     string rs1 = encodeRegister(args[0]);
-    string func3;
-    if (inst == "beq") func3 = "000";
-    if (inst == "bne") func3 = "001";
-    if (inst == "blt") func3 = "100";
-
+    string func3 = extractFunc3(inst);
     string opcode = "1100011";
-    string result = imm.substr(0, 1) + imm.substr(2, 6) + rs2 + rs1 + func3 + imm.substr(1, 1) + imm.substr(8, 4) + opcode;
-    cout << result << endl;  // Imprime el resultado de la instrucción procesada.
+
+    // Asegura el orden correcto del inmediato y otros campos
+    string result = imm[0] + imm[1] + rs2 + rs1 + func3 + imm[2] + imm[3] + opcode;
+
+    // Verifica que la longitud de la instrucción es de 32 bits.
+    if (result.size() != 32) {
+        cerr << "La longitud de la instrucción codificada no es de 32 bits: " << result.size() << " bits." << endl;
+        throw std::runtime_error("La instrucción codificada no tiene 32 bits.");
+    }
+
+    cout << "processTypeB" << endl;
+    cout << result << endl;
     return result;
 }
+
 
 
 
@@ -346,7 +393,7 @@ int main() {
     if (hasComment(line)) {
         removeComment(line);
     }
-    trim(line); // Asegúrate de aplicar trim adecuadamente
+    trim(line); 
 
     if (line.empty()) continue;
 
@@ -354,7 +401,7 @@ int main() {
     size_t colonPos = line.find(':');
     if (colonPos != string::npos) {
         string label = line.substr(0, colonPos);
-        trim(label); // Aplica trim aquí también para asegurarte de que no hay espacios extra
+        trim(label); 
         labelAddressMap[label] = currentAddress;
         continue; // No incrementar la dirección aún, las etiquetas no ocupan espacio
     }
