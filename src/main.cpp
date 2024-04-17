@@ -3,9 +3,29 @@
 #include <vector>
 #include <bitset>
 #include <string>
+#include <map>
 
 using namespace std;
 
+// Función para eliminar espacios en blanco al principio de la cadena
+void ltrim(std::string &s) {
+    while (!s.empty() && std::isspace(s.front())) {
+        s.erase(s.begin()); // Elimina el primer carácter
+    }
+}
+
+// Función para eliminar espacios en blanco al final de la cadena
+void rtrim(std::string &s) {
+    while (!s.empty() && std::isspace(s.back())) {
+        s.pop_back(); // Elimina el último carácter
+    }
+}
+
+// Función que combina ltrim y rtrim para eliminar espacios de ambos lados
+void trim(std::string &s) {
+    ltrim(s);
+    rtrim(s);
+}
 
 bool hasComment(string& l) {
     return l.find("#") != l.npos;
@@ -148,9 +168,18 @@ vector<string> separeImn(string l){
 }
 
 string encodeBType(const string& label, int currentAddress, const map<string, int>& labelAddressMap) {
+    if (labelAddressMap.find(label) == labelAddressMap.end()) {
+        cerr << "Error: Etiqueta '" << label << "' no definida." << endl;
+        throw std::out_of_range("Etiqueta no definida en el mapa.");
+    }
+
     int targetAddress = labelAddressMap.at(label);
     int offset = targetAddress - currentAddress;
     bitset<12> offsetBits(offset >> 1); // El desplazamiento se cuenta en incrementos de 2 bytes
+
+    cout << targetAddress << endl;
+    cout << currentAddress << endl;
+    cout << offset << endl;
 
     string imm;
     imm.push_back(offsetBits[11] ? '1' : '0'); // b12
@@ -160,6 +189,7 @@ string encodeBType(const string& label, int currentAddress, const map<string, in
 
     return imm;
 }
+
 
 
 vector<string> split(string& l){
@@ -245,8 +275,14 @@ string processTypeI(string inst, string rest) {
 }
 
 string processTypeB(string inst, string rest, int currentAddress, const map<string, int>& labelAddressMap) {
+    cout << "processTypeB" << endl;  // Asegúrate de que esta línea esté presente para visualizar el procesamiento.
     vector<string> args = split(rest);
-    string label = args[2]; // Asume que args[2] contiene la etiqueta
+    string label = args[2];
+    trim(label); // Asegúrate de eliminar espacios en la etiqueta
+    if (labelAddressMap.find(label) == labelAddressMap.end()) {
+        cerr << "Error: Etiqueta '" << label << "' no definida." << endl;
+        throw std::out_of_range("Etiqueta no definida en el mapa.");
+    }
     string imm = encodeBType(label, currentAddress, labelAddressMap);
 
     string rs2 = encodeRegister(args[1]);
@@ -258,8 +294,11 @@ string processTypeB(string inst, string rest, int currentAddress, const map<stri
 
     string opcode = "1100011";
     string result = imm.substr(0, 1) + imm.substr(2, 6) + rs2 + rs1 + func3 + imm.substr(1, 1) + imm.substr(8, 4) + opcode;
+    cout << result << endl;  // Imprime el resultado de la instrucción procesada.
     return result;
 }
+
+
 
 
 string processTypeU(string inst, string rest) {
@@ -282,6 +321,8 @@ string processTypeJ(string inst, string rest) {
     return result;
 }
 
+
+
 int main() {
     ifstream inputFile("../test/input.asm");
     if (!inputFile.is_open()) {
@@ -295,33 +336,60 @@ int main() {
         return 1;
     }
 
-    // Procesar cada línea del archivo de entrada
+    map<string, int> labelAddressMap;
+    vector<pair<int, string>> instructions; // Para almacenar las instrucciones y su dirección
     string line;
+    int currentAddress = 0;
+
+    // Primera pasada: construir el mapa de etiquetas y guardar las instrucciones
     while (getline(inputFile, line)) {
-        if (hasComment(line)) {
-            removeComment(line);
+    if (hasComment(line)) {
+        removeComment(line);
+    }
+    trim(line); // Asegúrate de aplicar trim adecuadamente
+
+    if (line.empty()) continue;
+
+    // Verificar si la línea define una etiqueta
+    size_t colonPos = line.find(':');
+    if (colonPos != string::npos) {
+        string label = line.substr(0, colonPos);
+        trim(label); // Aplica trim aquí también para asegurarte de que no hay espacios extra
+        labelAddressMap[label] = currentAddress;
+        continue; // No incrementar la dirección aún, las etiquetas no ocupan espacio
+    }
+
+    instructions.push_back(make_pair(currentAddress, line));
+    currentAddress += 4; // cada instrucción ocupa 4 bytes
+}
+
+
+    inputFile.clear(); // Limpia el estado del flujo
+    inputFile.seekg(0); // Vuelve al principio del archivo
+
+    // Segunda pasada: procesar las instrucciones
+    for (const auto& inst : instructions) {
+        currentAddress = inst.first;
+        string line = inst.second;
+
+        string instType = extractInst(line);
+        string encodedInst;
+        if (isTypeS(instType)) {
+            encodedInst = processTypeS(instType, line);
+        } else if (isTypeR(instType)) {
+            encodedInst = processTypeR(instType, line);
+        } else if (isTypeI(instType)) {
+            encodedInst = processTypeI(instType, line);
+        } else if (isTypeB(instType)) {
+            encodedInst = processTypeB(instType, line, currentAddress, labelAddressMap);
+        } else if (isTypeU(instType)) {
+            encodedInst = processTypeU(instType, line);
+        } else if (isTypeJ(instType)) {
+            encodedInst = processTypeJ(instType, line);
         }
-        string inst = extractInst(line);
-        if(isTypeS(inst)) {
-            string typeS = processTypeS(inst, line);
-            cout << typeS << endl;
-        }
-        if(isTypeR(inst)) {
-            string typeR = processTypeR(inst, line);
-            cout << typeR << endl;
-        }
-        if(isTypeI(inst)){
-            string typeI = processTypeI(inst, line);
-            cout << typeI << endl;
-        }
-        if(isTypeB(inst)){
-            string typeB = processTypeB(inst, line);
-            cout << typeB << endl;
-        }
-        if(isTypeU(inst)){
-            string typeJ = processTypeJ(inst, line);
-            cout << typeJ << endl;
-        }
+
+        outputFile << encodedInst << endl;
+        cout << encodedInst << endl;
     }
 
     inputFile.close();
@@ -330,3 +398,4 @@ int main() {
     cout << "Proceso completado. Se ha generado el archivo output.txt." << endl;
     return 0;
 }
+
