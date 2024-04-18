@@ -6,24 +6,33 @@
 #include <map>
 #include <algorithm>
 
+#define RESET   "\033[0m"
+#define MAGENTA "\033[35m"      /* Magenta */
+#define CYAN    "\033[36m"      /* Cyan */
+#define WHITE   "\033[37m"      /* White */
+#define RED     "\033[31m"      /* Red */
+#define GREEN   "\033[32m"      /* Green */
+#define YELLOW  "\033[33m"      /* Yellow */
+#define BLUE    "\033[34m"      /* Blue */
+
 using namespace std;
 
 // Función para eliminar espacios en blanco al principio de la cadena
-void ltrim(std::string &s) {
-    while (!s.empty() && std::isspace(s.front())) {
+void ltrim(string &s) {
+    while (!s.empty() && isspace(s.front())) {
         s.erase(s.begin()); // Elimina el primer carácter
     }
 }
 
 // Función para eliminar espacios en blanco al final de la cadena
-void rtrim(std::string &s) {
-    while (!s.empty() && std::isspace(s.back())) {
+void rtrim(string &s) {
+    while (!s.empty() && isspace(s.back())) {
         s.pop_back(); // Elimina el último carácter
     }
 }
 
 // Función que combina ltrim y rtrim para eliminar espacios de ambos lados
-void trim(std::string &s) {
+void trim(string &s) {
     ltrim(s);
     rtrim(s);
 }
@@ -39,6 +48,9 @@ void removeComment(string& l) {
 }
 
 string encodeRegister(string n) {
+    if(n == " zero"){
+        return "00000";
+    }
     int arg = stoi(n.substr(2,n.length()));
     bitset<5> binary(arg);
     return binary.to_string();
@@ -174,7 +186,7 @@ string extractFunc3(string& inst) {
     
     else {
         cerr << "Error: Instrucción desconocida o no soportada '" << inst << "' para extractFunc3." << endl;
-        throw std::invalid_argument("Instrucción desconocida para extractFunc3");
+        throw invalid_argument("Instrucción desconocida para extractFunc3");
     }
 }
 
@@ -199,7 +211,7 @@ vector<string> separeImn(string l){
 vector<string> encodeBType(const string& label, int currentAddress, const map<string, int>& labelAddressMap) {
     if (labelAddressMap.find(label) == labelAddressMap.end()) {
         cerr << "Error: La etiqueta '" << label << "' no está definida." << endl;
-        throw std::out_of_range("La etiqueta no está definida en el mapa.");
+        throw out_of_range("La etiqueta no está definida en el mapa.");
     }
 
     int targetAddress = labelAddressMap.at(label);
@@ -207,26 +219,30 @@ vector<string> encodeBType(const string& label, int currentAddress, const map<st
 
     // offset es un múltiplo de 2.
     if (offset % 2 != 0) {
-        throw std::runtime_error("El offset no es un múltiplo de 2.");
+        throw runtime_error("El offset no es un múltiplo de 2.");
     }
-    offset >>= 1 ; // Desplazar 1 bit a la derecha, ya que el bit en la posicion cero no se tiene en cuenta
+    // offset >>= 1 ; // Desplazar 1 bit a la derecha, ya que el bit en la posicion cero no se tiene en cuenta
 
     bitset<13> offsetBits(offset); 
     string imm13 = offsetBits.to_string();
+    // cout << "offset  " << offset << endl;
+    // cout << "imm  " << imm13 << endl;
 
     // b12 es el bit más significativo de offsetBits.
-    string b12 = imm13.substr(0, 1);
-
-    // b11 es el segundo bit menos significativo de offsetBits.
-    string b11 = imm13.substr(11, 1);
-
+    string b12 = imm13.substr(1, 1);
+    
     // b10_5 son los bits 10 a 5 de offsetBits.
-    string b10_5 = imm13.substr(1, 6);
+    string b10_5 = imm13.substr(imm13.length()-11, 6);
+    // reverse(b10_5.begin(), b10_5.end());
 
     // b4_1 son los bits 4 a 1 de offsetBits.
-    string b4_1 = imm13.substr(7, 4);
+    string b4_1 = imm13.substr(imm13.length()-5, 4);
+    // reverse(b4_1.begin(), b4_1.end());
 
-    return {b12, b11, b10_5, b4_1};
+    // b11 es el segundo bit menos significativo de offsetBits.
+    string b11 = imm13.substr(2, 1);
+
+    return {b12, b10_5, b4_1, b11};
 }
 
 
@@ -323,9 +339,12 @@ string processTypeB(string inst, string rest, int currentAddress, const map<stri
     trim(label);
 
     vector<string> imm = encodeBType(label, currentAddress, labelAddressMap);
-
+    // cout << "rs2: " << args[1];
     string rs2 = encodeRegister(args[1]);
+    // cout << " ==>" << rs2 << endl;
+    // cout << "rs1: " << args[0];
     string rs1 = encodeRegister(args[0]);
+    // cout << " ==>" << rs1 << endl;
     string func3 = extractFunc3(inst);
     string opcode = "1100011";
 
@@ -335,11 +354,10 @@ string processTypeB(string inst, string rest, int currentAddress, const map<stri
     // Verifica que la longitud de la instrucción es de 32 bits.
     if (result.size() != 32) {
         cerr << "La longitud de la instrucción codificada no es de 32 bits: " << result.size() << " bits." << endl;
-        throw std::runtime_error("La instrucción codificada no tiene 32 bits.");
+        throw runtime_error("La instrucción codificada no tiene 32 bits.");
     }
-
     cout << "processTypeB" << endl;
-    cout << result << endl;
+    // cout << RED << imm[0] << BLUE << imm[1] << YELLOW << rs2 << MAGENTA << rs1 << CYAN << func3 << RED << imm[2] << BLUE << imm[3] << WHITE << opcode << RESET << endl;
     return result;
 }
 
@@ -435,7 +453,7 @@ int main() {
         }
 
         outputFile << encodedInst << endl;
-        cout << encodedInst << endl;
+        cout << "instruction = " << CYAN << encodedInst << RESET << endl;
     }
 
     inputFile.close();
@@ -444,4 +462,3 @@ int main() {
     cout << "Proceso completado. Se ha generado el archivo output.txt." << endl;
     return 0;
 }
-
