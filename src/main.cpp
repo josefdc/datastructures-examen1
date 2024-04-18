@@ -140,6 +140,10 @@ bool isTypeJ( string& l ) {
 }
 
 string extractInst(string& l) {
+    // Instrucciones de tipo U
+    if (l.find("auipc") != l.npos) { l.erase(l.find("auipc"), 5); return "auipc"; }
+    if (l.find("lui") != l.npos) { l.erase(l.find("lui"), 3); return "lui"; }
+
     // Instrucciones de tipo S
     if (l.find("sw") != l.npos) { l.erase(l.find("sw"), 2); return "sw"; }
     if (l.find("sb") != l.npos) { l.erase(l.find("sb"), 2); return "sb"; }
@@ -161,16 +165,14 @@ string extractInst(string& l) {
     if (l.find("beq") != l.npos) { l.erase(l.find("beq"), 3); return "beq"; }
     if (l.find("bne") != l.npos) { l.erase(l.find("bne"), 3); return "bne"; }
     if (l.find("blt") != l.npos) { l.erase(l.find("blt"), 3); return "blt"; }
-
-    // Instrucciones de tipo U
-    if (l.find("lui") != l.npos) { l.erase(l.find("lui"), 3); return "lui"; }
-    if (l.find("auipc") != l.npos) { l.erase(l.find("auipc"), 5); return "auipc"; }
-
-    // Instrucción de tipo J
+    // para el caso de jal
     if (l.find("jal") != l.npos) { l.erase(l.find("jal"), 3); return "jal"; }
+    // para nop
+    if (l.find("nop") != l.npos) { l.erase(l.find("nop"), 3); return "nop"; }
 
     return "";
 }
+
 
 
 string extractFunc3(string& inst) {
@@ -247,6 +249,30 @@ vector<string> encodeBType(const string& label, int currentAddress, const map<st
 
 
 
+vector<string> encodeJType(const string& label, int currentAddress, const map<string, int>& labelAddressMap) {
+    if (labelAddressMap.find(label) == labelAddressMap.end()) {
+        cerr << "Error: La etiqueta '" << label << "' no está definida." << endl;
+        throw out_of_range("La etiqueta no está definida en el mapa.");
+    }
+
+    int targetAddress = labelAddressMap.at(label);
+    int offset = targetAddress - currentAddress;
+
+    if (offset % 2 != 0) {
+        throw runtime_error("El offset no es un múltiplo de 2 para instrucciones tipo J.");
+    }
+
+    bitset<21> offsetBits(offset); // incluimos un bit extra para el signo
+    string imm21 = offsetBits.to_string();
+
+    // Extraemos las partes necesarias
+    string imm20 = imm21.substr(0, 1);  // bit 20
+    string imm10_1 = imm21.substr(10, 10); // bits 10:1
+    string imm11 = imm21.substr(9, 1);  // bit 11
+    string imm19_12 = imm21.substr(1, 8); // bits 19:12
+
+    return {imm20, imm10_1, imm11, imm19_12};
+}
 
 
 
@@ -305,32 +331,44 @@ string processTypeR(string inst, string rest) {
 
 string processTypeI(string inst, string rest) {
     cout << "processTypeI" << endl;
-    vector<string> args = split(rest);
-    if (inst == "addi")
-    {
-        string imn = encodeConstNumber(args[2]);
-        string rs1 = encodeRegister(args[1]);
-        string func3 = "000";
-        string rd = encodeRegister(args[0]);
-        string opcode = "0010011";
-        // cout << "imn: " << imn << endl;
-        // cout << "rs1: " << rs1 << endl;
-        // cout << "rd: " << rd << endl;
+
+    if (inst == "nop") {
+        // NOP se codifica como addi x0, x0, 0
+        string imn = "000000000000";  // Valor inmediato es 0, 12 bits
+        string rs1 = "00000";         // Registro fuente es x0, 5 bits
+        string func3 = "000";         // Func3 para ADDI
+        string rd = "00000";          // Registro destino es x0, 5 bits
+        string opcode = "0010011";    // Opcode para instrucciones tipo I
         string result = imn + rs1 + func3 + rd + opcode;
         return result;
     }
-    if ( inst == "lw" ) {
-        string dest = args[1];
-        vector<string> imn = separeImn(dest);
-        string numberConst= encodeConstNumber(imn[0]);
-        string rs1= encodeRs1(imn[1]);
-        string func3 = "010";
-        string rd = encodeRegister(args[0]);
-        string opcode = "0000011";
-        string result = numberConst + rs1 + func3 + rd + opcode;
+
+    vector<string> args = split(rest);
+    string imn, rs1, func3, rd, opcode, result;
+
+    if (inst == "addi") {
+        imn = encodeConstNumber(args[2]);
+        rs1 = encodeRegister(args[1]);
+        func3 = "000";
+        rd = encodeRegister(args[0]);
+        opcode = "0010011";
+        result = imn + rs1 + func3 + rd + opcode;
         return result;
     }
-    return "";
+    
+    if (inst == "lw") {
+        string dest = args[1];
+        vector<string> imnParts = separeImn(dest);
+        imn = encodeConstNumber(imnParts[0]);
+        rs1 = encodeRs1(imnParts[1]);
+        func3 = "010";
+        rd = encodeRegister(args[0]);
+        opcode = "0000011";
+        result = imn + rs1 + func3 + rd + opcode;
+        return result;
+    }
+
+    throw std::runtime_error("Unsupported Type I instruction encountered.");
 }
 
 string processTypeB(string inst, string rest, int currentAddress, const map<string, int>& labelAddressMap) {
@@ -370,18 +408,42 @@ string processTypeU(string inst, string rest) {
     vector<string> args = split(rest);
     string numberConst = encodeConstNumberTypeU(args[1]);
     string rd = encodeRegister(args[0]);
-    string opcode = "0110111";
+    string opcode;
+
+    // Determinar el opcode correcto basado en la instrucción
+    if (inst == "lui") {
+        opcode = "0110111";  // Opcode para LUI
+    } else if (inst == "auipc") {
+        opcode = "0010111";  // Opcode para AUIPC
+    } else {
+        cerr << "Error: Instrucción de tipo U desconocida '" << inst << "'." << endl;
+        throw invalid_argument("Instrucción desconocida de tipo U");
+    }
+
     string result = numberConst + rd + opcode;
     return result;
 }
 
-string processTypeJ(string inst, string rest) {
+string processTypeJ(string inst, string rest, int currentAddress, const map<string, int>& labelAddressMap) {
     cout << "processTypeJ" << endl;
     vector<string> args = split(rest);
-    string numberConst = encodeConstNumberTypeU(args[1]);
+    string label = args[1];
+    trim(label);
+
+    vector<string> immParts = encodeJType(label, currentAddress, labelAddressMap);
     string rd = encodeRegister(args[0]);
     string opcode = "1101111";
-    string result = numberConst + rd + opcode;
+
+    // Reorganizar los bits según la especificación imm[20 | 10:1 | 11 | 19:12]
+    string imm = immParts[0] + immParts[1] + immParts[2] + immParts[3];
+    string result = imm + rd + opcode;
+
+    // Verificar la longitud
+    if (result.size() != 32) {
+        cerr << "La longitud de la instrucción codificada no es de 32 bits: " << result.size() << " bits." << endl;
+        throw runtime_error("La instrucción codificada no tiene 32 bits.");
+    }
+
     return result;
 }
 
@@ -442,14 +504,14 @@ int main() {
             encodedInst = processTypeS(instType, line);
         } else if (isTypeR(instType)) {
             encodedInst = processTypeR(instType, line);
-        } else if (isTypeI(instType)) {
+        } else if (isTypeI(instType)|| instType == "nop")  {
             encodedInst = processTypeI(instType, line);
         } else if (isTypeB(instType)) {
             encodedInst = processTypeB(instType, line, currentAddress, labelAddressMap);
         } else if (isTypeU(instType)) {
             encodedInst = processTypeU(instType, line);
         } else if (isTypeJ(instType)) {
-            encodedInst = processTypeJ(instType, line);
+            encodedInst = processTypeJ(instType, line, currentAddress, labelAddressMap);
         }
 
         outputFile << encodedInst << endl;
