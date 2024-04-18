@@ -125,6 +125,8 @@ bool isTypeB( string& l ) {
     if(l.find("beq") != l.npos) return 1;
     if(l.find("bne") != l.npos) return 1;
     if(l.find("blt") != l.npos) return 1;
+    if(l.find("bgeu") != l.npos) return 1;
+    if(l.find("bltu") != l.npos) return 1;
     return 0;
 }
 
@@ -162,6 +164,8 @@ string extractInst(string& l) {
     if (l.find("sll") != l.npos) { l.erase(l.find("sll"), 3); return "sll"; }
 
     // Instrucciones de tipo B
+    if (l.find("bgeu") != l.npos) { l.erase(l.find("bgeu"), 4); return "bgeu"; } 
+    if (l.find("bltu") != l.npos) { l.erase(l.find("bltu"), 4); return "bltu"; } 
     if (l.find("beq") != l.npos) { l.erase(l.find("beq"), 3); return "beq"; }
     if (l.find("bne") != l.npos) { l.erase(l.find("bne"), 3); return "bne"; }
     if (l.find("blt") != l.npos) { l.erase(l.find("blt"), 3); return "blt"; }
