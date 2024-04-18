@@ -229,7 +229,6 @@ vector<string> encodeBType(const string& label, int currentAddress, const map<st
     return {b12, b11, b10_5, b4_1};
 }
 
-    
 
 
 
