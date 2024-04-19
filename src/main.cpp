@@ -48,13 +48,32 @@ void removeComment(string& l) {
 }
 
 string encodeRegister(string n) {
-    if(n == " zero"){
+    trim(n);  // Asegurarse de que no hay espacios en blanco alrededor
+    if (n == "zero") {
         return "00000";
     }
-    int arg = stoi(n.substr(2,n.length()));
-    bitset<5> binary(arg);
-    return binary.to_string();
+    if (n.size() < 2 || n[0] != 'x') {
+        cerr << "Invalid register format: " << n << "\n";
+        return "00000";
+    }
+
+    try {
+        int arg = stoi(n.substr(1));
+        if (arg < 0 || arg > 31) {
+            cerr << "Invalid register number: " << n << "\n";
+            return "00000";
+        }
+        bitset<5> binary(arg);
+        return binary.to_string();
+    } catch (const invalid_argument& ia) {
+        cerr << "Invalid argument: Could not convert string to integer. " << n << "\n";
+        return "00000";
+    } catch (const out_of_range& oor) {
+        cerr << "Out of range: Number too large. " << n << "\n";
+        return "00000";
+    }
 }
+
 
 string encodeRs1 (string n) {
     int arg = stoi(n.substr(1,n.length()));
@@ -112,6 +131,14 @@ bool isTypeR(string& l) {
     if(l.find("add") != l.npos) return 1;
     if(l.find("sub") != l.npos) return 1;
     if(l.find("xor") != l.npos) return 1;
+    if(l.find("and") != l.npos) return 1;
+    if(l.find("sll") != l.npos) return 1;
+    if(l.find("sltu") != l.npos) return 1;
+    if(l.find("slt") != l.npos) return 1;
+    
+    if(l.find("srl") != l.npos) return 1;
+    if(l.find("sra") != l.npos) return 1;
+    if(l.find("or") != l.npos) return 1;
     return 0;
 }
 
@@ -162,6 +189,11 @@ string extractInst(string& l) {
     if (l.find("xor") != l.npos) { l.erase(l.find("xor"), 3); return "xor"; }
     if (l.find("and") != l.npos) { l.erase(l.find("and"), 3); return "and"; }
     if (l.find("sll") != l.npos) { l.erase(l.find("sll"), 3); return "sll"; }
+    if (l.find("sltu") != l.npos) { l.erase(l.find("sltu"), 4); return "sltu"; }
+    if (l.find("slt") != l.npos) { l.erase(l.find("slt"), 3); return "slt"; }
+    if (l.find("srl") != l.npos) { l.erase(l.find("srl"), 3); return "srl"; }
+    if (l.find("sra") != l.npos) { l.erase(l.find("sra"), 3); return "sra"; }
+    if (l.find("or") != l.npos) { l.erase(l.find("or"), 2); return "or"; }
 
     // Instrucciones de tipo B
     if (l.find("bgeu") != l.npos) { l.erase(l.find("bgeu"), 4); return "bgeu"; } 
@@ -318,7 +350,15 @@ string processTypeR(string inst, string rest) {
     string func3;
     if(inst == "add"){ func7 = "0000000"; func3 = "000"; }
     if(inst == "sub"){ func7 = "0100000"; func3 = "000"; }
+    if (inst == "sll"){ func7 = "0000000"; func3 = "001"; }
+    if (inst == "sltu"){ func7 = "0000000"; func3 = "011"; }
+    if (inst == "slt"){ func7 = "0000000"; func3 = "010"; } 
     if(inst == "xor"){ func7 = "0000000"; func3 = "100"; }
+    if(inst == "srl"){ func7 = "0000000"; func3 = "101"; }
+    if(inst == "sra"){ func7 = "0100000"; func3 = "101"; }
+    if (inst == "or"){ func7 = "0000000"; func3 = "110"; }
+    if (inst == "and"){ func7 = "0000000"; func3 = "111"; }
+
     vector<string> args = split(rest);
     string rs2 = encodeRegister(args[2]);
     string rs1 = encodeRegister(args[1]);
@@ -390,7 +430,7 @@ string processTypeB(string inst, string rest, int currentAddress, const map<stri
     string func3 = extractFunc3(inst);
     string opcode = "1100011";
 
-    // Asegura el orden correcto del inmediato y otros campos
+    // orden de los bits: imm[12 | 10:5 | 4:1 | 11]
     string result = imm[0] + imm[1] + rs2 + rs1 + func3 + imm[2] + imm[3] + opcode;
 
     // Verifica que la longitud de la instrucción es de 32 bits.

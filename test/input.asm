@@ -1,39 +1,28 @@
-# Definición de etiquetas para puntos de salto
-label_start:
-nop
+# Pruebas básicas para operaciones tipo R
 
-# Pruebas básicas para bltu y bgeu
-bltu x1, x2, label_greater # Debería saltar si x1 es menor sin signo que x2
-bgeu x3, x4, label_less     # Debería saltar si x3 es mayor o igual sin signo que x4
+# Pruebas de operaciones aritméticas básicas
+add x7, x1, x2    # x7 = x1 + x2
+sub x8, x1, x2    # x8 = x1 - x2
 
-# Pruebas con valores límite
-lui x1, 0xFFFFF     # Máximo valor posible para pruebas de límite superior
-lui x2, 0x1         # Mínimo valor positivo mayor que cero
-addi x3, x0, -1     # Mínimo valor posible (negativo en complemento a dos)
-addi x4, x0, 0      # Valor cero para pruebas de igualdad
+# Pruebas de operaciones de desplazamiento
+sll x9, x2, x1    # x9 = x2 << x1
+srl x10, x3, x1   # x10 = x3 >> x1
+sra x11, x4, x1   # x11 = x4 >> x1 (aritméticamente)
 
-bltu x1, x0, label_mid # No debería saltar, x1 es mayor
-bgeu x0, x4, label_mid # Debería saltar, x0 igual a x4 (ambos 0, sin signo)
+# Pruebas de operaciones de comparación
+slt x12, x1, x2   # x12 = 1 si x1 < x2, sino 0
+sltu x1, x2, x3  # x1 = 1 si x2 < x3 (sin signo), sino 0
 
-label_greater:
-# Punto de llegada si x1 < x2
-nop
 
-label_less:
-# Punto de llegada si x3 >= x4
-nop
+# Pruebas de operaciones lógicas
+xor x14, x1, x2   # x14 = x1 XOR x2
+or x15, x1, x2    # x15 = x1 OR x2
+and x16, x1, x2   # x16 = x1 AND x2
 
-label_mid:
-# Punto de llegada alternativo
-nop
+# Instrucciones después de las pruebas para verificar la secuencia de ejecución
+nop                # No realiza ninguna operación
+nop                # No realiza ninguna operación
 
-# Asegúrate de tener instrucciones después de las pruebas para confirmar que los saltos funcionan correctamente
-add x5, x1, x2
-add x6, x3, x4
-
-# Más pruebas si necesario
-bltu x1, x3, label_end  # Pruebas adicionales de orden
-bgeu x4, x2, label_start
-
+# Definiciones de etiquetas al final para garantizar el espacio y la estructura del código
 label_end:
 nop # Final de las pruebas
