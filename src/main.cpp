@@ -145,6 +145,19 @@ bool isTypeR(string& l) {
 bool isTypeI(string& l) {
     if(l.find("addi") != l.npos) return 1;
     if(l.find("lw") != l.npos) return 1;
+    if(l.find("lb") != l.npos) return 1;
+    if(l.find("lh") != l.npos) return 1;
+    if(l.find("lbu") != l.npos) return 1;
+    if(l.find("lhu") != l.npos) return 1;
+    if(l.find("sltiu") != l.npos) return 1;
+    if(l.find("slti") != l.npos) return 1;
+    if(l.find("xori") != l.npos) return 1;
+    if(l.find("ori") != l.npos) return 1;
+    if(l.find("andi") != l.npos) return 1;
+    if(l.find("jalr") != l.npos) return 1;
+    if(l.find("ecall") != l.npos) return 1;
+    if(l.find("ebreak") != l.npos) return 1;
+
     return 0;
 }
 
@@ -154,6 +167,7 @@ bool isTypeB( string& l ) {
     if(l.find("blt") != l.npos) return 1;
     if(l.find("bgeu") != l.npos) return 1;
     if(l.find("bltu") != l.npos) return 1;
+    if(l.find("bge") != l.npos) return 1;
     return 0;
 }
 
@@ -170,44 +184,60 @@ bool isTypeJ( string& l ) {
 
 string extractInst(string& l) {
     // Instrucciones de tipo U
-    if (l.find("auipc") != l.npos) { l.erase(l.find("auipc"), 5); return "auipc"; }
-    if (l.find("lui") != l.npos) { l.erase(l.find("lui"), 3); return "lui"; }
+    if (l.find("auipc") != string::npos) { l.erase(l.find("auipc"), 5); return "auipc"; }
+    if (l.find("lui") != string::npos) { l.erase(l.find("lui"), 3); return "lui"; }
 
     // Instrucciones de tipo S
-    if (l.find("sw") != l.npos) { l.erase(l.find("sw"), 2); return "sw"; }
-    if (l.find("sb") != l.npos) { l.erase(l.find("sb"), 2); return "sb"; }
-    if (l.find("sh") != l.npos) { l.erase(l.find("sh"), 2); return "sh"; }
+    if (l.find("sw") != string::npos) { l.erase(l.find("sw"), 2); return "sw"; }
+    if (l.find("sb") != string::npos) { l.erase(l.find("sb"), 2); return "sb"; }
+    if (l.find("sh") != string::npos) { l.erase(l.find("sh"), 2); return "sh"; }
 
-    // Instrucciones de tipo I
-    if (l.find("addi") != l.npos) { l.erase(l.find("addi"), 4); return "addi"; }
-    if (l.find("ori") != l.npos) { l.erase(l.find("ori"), 3); return "ori"; }
-    if (l.find("lw") != l.npos) { l.erase(l.find("lw"), 2); return "lw"; }
+    // Instrucciones de tipo I 
+    if (l.find("sltiu") != string::npos) { l.erase(l.find("sltiu"), 5); return "sltiu"; }
+    if (l.find("slti") != string::npos) { l.erase(l.find("slti"), 4); return "slti"; }
+    if (l.find("xori") != string::npos) { l.erase(l.find("xori"), 4); return "xori"; }
+    if (l.find("ori") != string::npos) { l.erase(l.find("ori"), 3); return "ori"; }
+    if (l.find("andi") != string::npos) { l.erase(l.find("andi"), 4); return "andi"; }
+    if (l.find("addi") != string::npos) { l.erase(l.find("addi"), 4); return "addi"; }
+    if (l.find("lbu") != string::npos) { l.erase(l.find("lbu"), 3); return "lbu"; }
+    if (l.find("lhu") != string::npos) { l.erase(l.find("lhu"), 3); return "lhu"; }
+    if (l.find("lw") != string::npos) { l.erase(l.find("lw"), 2); return "lw"; }
+    if (l.find("lb") != string::npos) { l.erase(l.find("lb"), 2); return "lb"; }
+    if (l.find("lh") != string::npos) { l.erase(l.find("lh"), 2); return "lh"; }
+
+
+    if (l.find("jalr") != string::npos) { l.erase(l.find("jalr"), 4); return "jalr"; }
+    if (l.find("ecall") != string::npos) { l.erase(l.find("ecall"), 5); return "ecall"; }
+    if (l.find("ebreak") != string::npos) { l.erase(l.find("ebreak"), 6); return "ebreak"; }
+    
 
     // Instrucciones de tipo R
-    if (l.find("add") != l.npos) { l.erase(l.find("add"), 3); return "add"; }
-    if (l.find("sub") != l.npos) { l.erase(l.find("sub"), 3); return "sub"; }
-    if (l.find("xor") != l.npos) { l.erase(l.find("xor"), 3); return "xor"; }
-    if (l.find("and") != l.npos) { l.erase(l.find("and"), 3); return "and"; }
-    if (l.find("sll") != l.npos) { l.erase(l.find("sll"), 3); return "sll"; }
-    if (l.find("sltu") != l.npos) { l.erase(l.find("sltu"), 4); return "sltu"; }
-    if (l.find("slt") != l.npos) { l.erase(l.find("slt"), 3); return "slt"; }
-    if (l.find("srl") != l.npos) { l.erase(l.find("srl"), 3); return "srl"; }
-    if (l.find("sra") != l.npos) { l.erase(l.find("sra"), 3); return "sra"; }
-    if (l.find("or") != l.npos) { l.erase(l.find("or"), 2); return "or"; }
+    if (l.find("add") != string::npos) { l.erase(l.find("add"), 3); return "add"; }
+    if (l.find("sub") != string::npos) { l.erase(l.find("sub"), 3); return "sub"; }
+    if (l.find("xor") != string::npos) { l.erase(l.find("xor"), 3); return "xor"; }
+    if (l.find("and") != string::npos) { l.erase(l.find("and"), 3); return "and"; }
+    if (l.find("sll") != string::npos) { l.erase(l.find("sll"), 3); return "sll"; }
+    if (l.find("sltu") != string::npos) { l.erase(l.find("sltu"), 4); return "sltu"; }
+    if (l.find("slt") != string::npos) { l.erase(l.find("slt"), 3); return "slt"; }
+    if (l.find("srl") != string::npos) { l.erase(l.find("srl"), 3); return "srl"; }
+    if (l.find("sra") != string::npos) { l.erase(l.find("sra"), 3); return "sra"; }
+    if (l.find("or") != string::npos) { l.erase(l.find("or"), 2); return "or"; }
 
     // Instrucciones de tipo B
-    if (l.find("bgeu") != l.npos) { l.erase(l.find("bgeu"), 4); return "bgeu"; } 
-    if (l.find("bltu") != l.npos) { l.erase(l.find("bltu"), 4); return "bltu"; } 
-    if (l.find("beq") != l.npos) { l.erase(l.find("beq"), 3); return "beq"; }
-    if (l.find("bne") != l.npos) { l.erase(l.find("bne"), 3); return "bne"; }
-    if (l.find("blt") != l.npos) { l.erase(l.find("blt"), 3); return "blt"; }
-    // para el caso de jal
-    if (l.find("jal") != l.npos) { l.erase(l.find("jal"), 3); return "jal"; }
-    // para nop
-    if (l.find("nop") != l.npos) { l.erase(l.find("nop"), 3); return "nop"; }
+    if (l.find("bgeu") != string::npos) { l.erase(l.find("bgeu"), 4); return "bgeu"; }
+    if (l.find("bltu") != string::npos) { l.erase(l.find("bltu"), 4); return "bltu"; }
+    if (l.find("bge") != string::npos) { l.erase(l.find("bge"), 3); return "bge"; }
+    if (l.find("beq") != string::npos) { l.erase(l.find("beq"), 3); return "beq"; }
+    if (l.find("bne") != string::npos) { l.erase(l.find("bne"), 3); return "bne"; }
+    if (l.find("blt") != string::npos) { l.erase(l.find("blt"), 3); return "blt"; }
+
+    // Instrucción especial
+    if (l.find("jal") != string::npos) { l.erase(l.find("jal"), 3); return "jal"; }
+    if (l.find("nop") != string::npos) { l.erase(l.find("nop"), 3); return "nop"; }
 
     return "";
 }
+
 
 
 
@@ -375,45 +405,74 @@ string processTypeR(string inst, string rest) {
 
 string processTypeI(string inst, string rest) {
     cout << "processTypeI" << endl;
+    vector<string> args = split(rest);
+    string imn, rs1, func3, rd, opcode = "0010011"; // Opcode para operaciones inmediatas
+    string result;
 
+    // Manejo especial para NOP como un caso de ADDI con todos los ceros
     if (inst == "nop") {
-        // NOP se codifica como addi x0, x0, 0
-        string imn = "000000000000";  // Valor inmediato es 0, 12 bits
-        string rs1 = "00000";         // Registro fuente es x0, 5 bits
-        string func3 = "000";         // Func3 para ADDI
-        string rd = "00000";          // Registro destino es x0, 5 bits
-        string opcode = "0010011";    // Opcode para instrucciones tipo I
-        string result = imn + rs1 + func3 + rd + opcode;
+        imn = "000000000000";  // Valor inmediato es 0, 12 bits
+        rs1 = "00000";         // Registro fuente es x0, 5 bits
+        rd = "00000";          // Registro destino es x0, 5 bits
+        func3 = "000";         // Func3 para ADDI
+        result = imn + rs1 + func3 + rd + opcode;
         return result;
     }
 
-    vector<string> args = split(rest);
-    string imn, rs1, func3, rd, opcode, result;
-
-    if (inst == "addi") {
+    // Decodificar registros y manejar inmediatos para operaciones no relacionadas con la memoria
+    if (inst == "addi" || inst == "slti" || inst == "sltiu" || inst == "xori" || inst == "ori" || inst == "andi") {
         imn = encodeConstNumber(args[2]);
         rs1 = encodeRegister(args[1]);
-        func3 = "000";
         rd = encodeRegister(args[0]);
-        opcode = "0010011";
+        if (inst == "addi") func3 = "000";
+        else if (inst == "slti") func3 = "010";
+        else if (inst == "sltiu") func3 = "011";
+        else if (inst == "xori") func3 = "100";
+        else if (inst == "ori") func3 = "110";
+        else if (inst == "andi") func3 = "111";
+    }
+    // Manejar instrucciones de carga que utilizan un formato de dirección entre paréntesis
+    else if (inst == "lw" || inst == "lb" || inst == "lh" || inst == "lbu" || inst == "lhu") {
+        string dest = args[1];
+        vector<string> imnParts = separeImn(dest); // Separar la dirección y el registro base
+        imn = encodeConstNumber(imnParts[0]); // Parte inmediata de la dirección
+        rs1 = encodeRs1(imnParts[1]); // Registro base extraído
+        rd = encodeRegister(args[0]); // Registro destino
+        opcode = "0000011"; // Opcode específico para cargas
+        if (inst == "lw") func3 = "010";
+        else if (inst == "lb") func3 = "000";
+        else if (inst == "lh") func3 = "001";
+        else if (inst == "lbu") func3 = "100";
+        else if (inst == "lhu") func3 = "101";
+    
+    }else if (inst == "jalr") {
+        imn = encodeConstNumber(args[1]); // Valor inmediato
+        rs1 = encodeRegister(args[0]); // Registro base
+        rd = encodeRegister(args[2]); // Registro destino
+        func3 = "000"; // func3 para JALR
+        opcode = "1100111"; // Opcode para JALR
         result = imn + rs1 + func3 + rd + opcode;
         return result;
     }
+    else if  (inst == "ecall" || inst == "ebreak") {
+    imn = (inst == "ecall" ? "000000000000" : "000000000001"); // Códigos inmediatos para ECALL y EBREAK
+    rs1 = "00000";
+    rd = "00000";
+    func3 = "000";
+    opcode = "1110011";
+}  
     
-    if (inst == "lw") {
-        string dest = args[1];
-        vector<string> imnParts = separeImn(dest);
-        imn = encodeConstNumber(imnParts[0]);
-        rs1 = encodeRs1(imnParts[1]);
-        func3 = "010";
-        rd = encodeRegister(args[0]);
-        opcode = "0000011";
-        result = imn + rs1 + func3 + rd + opcode;
-        return result;
+    else {
+        throw std::runtime_error("Unsupported Type I instruction encountered: " + inst);
     }
 
-    throw std::runtime_error("Unsupported Type I instruction encountered.");
+    // Construir la instrucción completa
+    result = imn + rs1 + func3 + rd + opcode;
+    return result;
 }
+
+
+
 
 string processTypeB(string inst, string rest, int currentAddress, const map<string, int>& labelAddressMap) {
     vector<string> args = split(rest);
@@ -546,11 +605,13 @@ int main() {
         string encodedInst;
         if (isTypeS(instType)) {
             encodedInst = processTypeS(instType, line);
-        } else if (isTypeR(instType)) {
-            encodedInst = processTypeR(instType, line);
-        } else if (isTypeI(instType)|| instType == "nop")  {
+        } 
+        else if (isTypeI(instType)|| instType == "nop")  {
             encodedInst = processTypeI(instType, line);
-        } else if (isTypeB(instType)) {
+        }
+        else if (isTypeR(instType)) {
+            encodedInst = processTypeR(instType, line);
+        }  else if (isTypeB(instType)) {
             encodedInst = processTypeB(instType, line, currentAddress, labelAddressMap);
         } else if (isTypeU(instType)) {
             encodedInst = processTypeU(instType, line);
